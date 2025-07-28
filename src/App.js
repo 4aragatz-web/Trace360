@@ -23,7 +23,7 @@ function App() {
 
   // Load products from backend on mount
   useEffect(() => {
-    axios.get('http://localhost:4000/products')
+    axios.get('http://trace360-co.onrender.com/products')
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -81,8 +81,8 @@ function App() {
 
   // Save (add or update) a product to backend and update state
   const handleSaveNewProduct = (newProduct) => {
-    axios.post('http://localhost:4000/products', newProduct)
-      .then(() => axios.get('http://localhost:4000/products'))
+    axios.post('http://trace360-co.onrender.com/products', newProduct)
+      .then(() => axios.get('http://trace360-co.onrender.com/products'))
       .then(res => {
         setProducts(res.data);
         setShowDetails(true);

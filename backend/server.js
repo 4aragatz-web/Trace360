@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000; // Use Render's provided port if available
 const DATA_FILE = './products.json';
 
 app.use(cors());
@@ -42,5 +42,5 @@ app.post('/products', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
