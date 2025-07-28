@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Replace with your actual MongoDB connection string
-const MONGODB_URI = 'mongodb+srv://Trace360:hemp123@cluster0.mongodb.net/trace360?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://Trace360:Hemp123@cluster0.mongodb.net/trace360?retryWrites=true&w=majority';
 
 app.use(cors());
 app.use(bodyParser.json());
