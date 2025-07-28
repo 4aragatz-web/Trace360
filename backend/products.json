@@ -1,0 +1,71 @@
+[
+  {
+    "id": "1",
+    "farmName": "Bowen",
+    "organicCertified": "Yes",
+    "dateSow": "2025-07-01",
+    "seedVariety": "HGT1",
+    "grownFor": "Plant Seed",
+    "dateHarvested": "",
+    "thc": "",
+    "currentStatus": "Cleaning",
+    "custodyHistory": [
+      {
+        "date": "2025-07-28",
+        "previousStatus": "",
+        "newStatus": "Growing"
+      },
+      {
+        "date": "2025-07-28",
+        "previousStatus": "Growing",
+        "newStatus": "Harvesting"
+      },
+      {
+        "date": "2025-07-28",
+        "previousStatus": "Harvesting",
+        "newStatus": "Drying"
+      },
+      {
+        "date": "2025-07-28",
+        "previousStatus": "Drying",
+        "newStatus": "Cleaning"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "farmName": "HomeHill",
+    "organicCertified": "No",
+    "dateSow": "2025-07-04",
+    "seedVariety": "MS77",
+    "grownFor": "Grain",
+    "dateHarvested": "",
+    "thc": "",
+    "currentStatus": "Planted",
+    "custodyHistory": [
+      {
+        "date": "2025-07-28",
+        "previousStatus": "",
+        "newStatus": "Planted"
+      }
+    ]
+  },
+  {
+    "id": "GOOS0924",
+    "farmName": "Kirknie, Queensland",
+    "organicCertified": "No",
+    "dateSow": "2024-05-16",
+    "seedVariety": "MS77",
+    "grownFor": "Grain",
+    "dateHarvested": "2024-09-09",
+    "thc": "0.017",
+    "currentStatus": "Header Dressed, Packed in Bulk Bags, store in Townsville",
+    "custodyHistory": [
+      {
+        "date": "2025-07-28",
+        "previousStatus": "",
+        "newStatus": "Header Dressed, Packed in Bulk Bags, store in Townsville"
+      }
+    ]
+  }
+]
