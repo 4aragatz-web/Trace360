@@ -7,7 +7,6 @@ import NewProductForm from './NewProductForm';
 import ChainOfCustodyPage from './ChainOfCustodyPage';
 import logo from './logo.png';
 
-// Password check function
 const requestPassword = () => {
   const input = window.prompt("Enter password to edit or add a product:");
   return input === EDIT_PASSWORD;
@@ -21,7 +20,6 @@ function App() {
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
 
-  // Load products from backend on mount
   useEffect(() => {
     axios.get('https://trace360-co.onrender.com/products')
       .then(res => setProducts(res.data))
@@ -39,7 +37,6 @@ function App() {
         setShowNewProductForm(false);
         setEditProduct(null);
       } else {
-        // Password check for new product
         if (!requestPassword()) {
           alert("Incorrect password.");
           return;
@@ -60,7 +57,6 @@ function App() {
       setShowNewProductForm(false);
       setEditProduct(null);
     } else {
-      // Password check for new product
       if (!requestPassword()) {
         alert("Incorrect password.");
         return;
@@ -79,7 +75,6 @@ function App() {
     setTraceId('');
   };
 
-  // Save (add or update) a product to backend and update state
   const handleSaveNewProduct = (newProduct) => {
     axios.post('https://trace360-co.onrender.com/products', newProduct)
       .then(() => axios.get('https://trace360-co.onrender.com/products'))
@@ -93,7 +88,6 @@ function App() {
   };
 
   const handleEdit = () => {
-    // Password check for editing
     if (!requestPassword()) {
       alert("Incorrect password.");
       return;
@@ -112,9 +106,18 @@ function App() {
 
   return (
     <div className="app-container">
-      <img src={logo} alt="Company Logo" style={{ height: 60, marginBottom: 16 }} />
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="background-video"
+        src="/background.mp4"
+      />
+      <img src={logo} alt="Company Logo" style={{ height: 60, marginBottom: 16, position: 'relative', zIndex: 1 }} />
       <HomeScreen />
-      <div style={{ marginTop: 32 }}>
+      <div style={{ marginTop: 32, position: 'relative', zIndex: 1 }}>
         {!showDetails && !showNewProductForm && !showChainOfCustody ? (
           <>
             <h2>Scan Barcode</h2>
@@ -160,7 +163,7 @@ function App() {
           </>
         )}
       </div>
-    </div>  
+    </div>
   );
 }
 export default App;
