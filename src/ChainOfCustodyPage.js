@@ -1,13 +1,9 @@
-import React, { useRef, useState } from 'react';
-import axios from 'axios';
-import ChainOfCustody from './ChainOfCustody';
+import React, { useRef } from 'react';
+import jsPDF from 'jspdf';
 import logo from './logo.png';
 
 function ChainOfCustodyPage({ product, onBack }) {
   const certificateRef = useRef();
-  const [email, setEmail] = useState('');
-  const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState('');
 
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
@@ -23,24 +19,39 @@ function ChainOfCustodyPage({ product, onBack }) {
     win.print();
   };
 
-  // NEW: Send PDF via backend
-  const handleEmail = async () => {
-    if (!email) {
-      setMessage('Please enter a recipient email.');
-      return;
-    }
-    setSending(true);
-    setMessage('');
-    try {
-      await axios.post('https://trace360-co.onrender.com/send-custody-pdf', {
-        email,
-        product
+  // Download PDF using jsPDF
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    let y = 20;
+    doc.setFontSize(16);
+    doc.text(`Chain of Custody Certificate`, 10, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(`Barcode Number: ${product.id}`, 10, y);
+    y += 8;
+    doc.text(`Seed Variety: ${product.seedVariety}`, 10, y);
+    y += 8;
+    doc.text(`Grown Location: ${product.farmName}`, 10, y);
+    y += 8;
+    doc.text(`Organic Certified: ${product.organicCertified}`, 10, y);
+    y += 8;
+    doc.text(`THC Level: ${product.thc}`, 10, y);
+    y += 12;
+    doc.text('Chain of Custody:', 10, y);
+    y += 8;
+    if (product.custodyHistory && product.custodyHistory.length > 0) {
+      product.custodyHistory.forEach((entry, idx) => {
+        doc.text(
+          `${idx + 1}. ${entry.date}: ${entry.previousStatus} → ${entry.newStatus}`,
+          10,
+          y
+        );
+        y += 8;
       });
-      setMessage('PDF sent successfully!');
-    } catch (err) {
-      setMessage('Failed to send PDF.');
+    } else {
+      doc.text('No custody history available.', 10, y);
     }
-    setSending(false);
+    doc.save(`ChainOfCustody_${product.id}.pdf`);
   };
 
   return (
@@ -91,19 +102,7 @@ function ChainOfCustodyPage({ product, onBack }) {
         </table>
       </div>
       <button onClick={handlePrint} style={{ marginRight: 8 }}>Print Certificate</button>
-      {/* Email input and button */}
-      <input
-        type="email"
-        placeholder="Recipient email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        style={{ marginRight: 8, padding: 6, borderRadius: 4, border: '1px solid #bbb' }}
-        disabled={sending}
-      />
-      <button onClick={handleEmail} disabled={sending} style={{ marginRight: 8 }}>
-        {sending ? 'Sending...' : 'Email Certificate'}
-      </button>
-      {message && <div style={{ marginTop: 8, color: message.includes('success') ? 'green' : 'red' }}>{message}</div>}
+      <button onClick={handleDownloadPDF} style={{ marginRight: 8 }}>Download PDF</button>
       <button onClick={onBack} style={{ marginTop: 16 }}>Back</button>
     </div>
   );
