@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import logo from './logo.png';
 
 function ChainOfCustodyPage({ product, onBack }) {
@@ -19,39 +20,55 @@ function ChainOfCustodyPage({ product, onBack }) {
     win.print();
   };
 
-  // Download PDF using jsPDF
+  // Download PDF using jsPDF and jspdf-autotable
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    let y = 20;
-    doc.setFontSize(16);
-    doc.text(`Chain of Custody Certificate`, 10, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(`Barcode Number: ${product.id}`, 10, y);
-    y += 8;
-    doc.text(`Seed Variety: ${product.seedVariety}`, 10, y);
-    y += 8;
-    doc.text(`Grown Location: ${product.farmName}`, 10, y);
-    y += 8;
-    doc.text(`Organic Certified: ${product.organicCertified}`, 10, y);
-    y += 8;
-    doc.text(`THC Level: ${product.thc}`, 10, y);
-    y += 12;
-    doc.text('Chain of Custody:', 10, y);
-    y += 8;
-    if (product.custodyHistory && product.custodyHistory.length > 0) {
-      product.custodyHistory.forEach((entry, idx) => {
-        doc.text(
-          `${idx + 1}. ${entry.date}: ${entry.previousStatus} → ${entry.newStatus}`,
-          10,
-          y
-        );
-        y += 8;
+    let y = 15;
+
+    // Add logo (centered)
+    const img = new window.Image();
+    img.src = logo;
+    img.onload = function () {
+      doc.addImage(img, 'PNG', 80, y, 50, 20); // Adjust position/size as needed
+      y += 25;
+
+      doc.setFontSize(18);
+      doc.setTextColor(66, 117, 106);
+      doc.text('Certificate of Chain of Custody', 105, y, { align: 'center' });
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Barcode Number: ${product.id}`, 14, y);
+      y += 8;
+      doc.text(`Seed Variety: ${product.seedVariety}`, 14, y);
+      y += 8;
+      doc.text(`Grown Location: ${product.farmName}`, 14, y);
+      y += 8;
+      doc.text(`Organic Certified: ${product.organicCertified}`, 14, y);
+      y += 8;
+      doc.text(`THC Level: ${product.thc}`, 14, y);
+      y += 10;
+
+      // Table for custody history
+      const tableData = product.custodyHistory && product.custodyHistory.length > 0
+        ? product.custodyHistory.map(entry => [
+            entry.date, entry.previousStatus, entry.newStatus
+          ])
+        : [['-', '-', '-']];
+
+      doc.autoTable({
+        head: [['Date', 'Previous Status', 'New Status']],
+        body: tableData,
+        startY: y,
+        styles: { fontSize: 11, cellPadding: 3 },
+        headStyles: { fillColor: [66, 117, 106] }
       });
-    } else {
-      doc.text('No custody history available.', 10, y);
-    }
-    doc.save(`ChainOfCustody_${product.id}.pdf`);
+
+      doc.save(`ChainOfCustody_${product.id}.pdf`);
+    };
+    // If logo is already loaded (from cache), trigger onload manually
+    if (img.complete) img.onload();
   };
 
   return (
