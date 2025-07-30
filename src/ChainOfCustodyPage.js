@@ -1,9 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import axios from 'axios';
 import ChainOfCustody from './ChainOfCustody';
 import logo from './logo.png';
 
 function ChainOfCustodyPage({ product, onBack }) {
   const certificateRef = useRef();
+  const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState('');
 
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
@@ -19,15 +23,24 @@ function ChainOfCustodyPage({ product, onBack }) {
     win.print();
   };
 
-  const handleEmail = () => {
-    const subject = `Chain of Custody Certificate for ${product.id}`;
-    const body = encodeURIComponent(
-      `Certificate for Trace ID: ${product.id}\nSeed Variety: ${product.seedVariety}\nGrown Location: ${product.farmName}\nOrganic Certified: ${product.organicCertified}\nTHC Level: ${product.thc}\n\nChain of Custody:\n` +
-      product.custodyHistory.map(entry =>
-        `${entry.date}: ${entry.previousStatus} → ${entry.newStatus}`
-      ).join('\n')
-    );
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  // NEW: Send PDF via backend
+  const handleEmail = async () => {
+    if (!email) {
+      setMessage('Please enter a recipient email.');
+      return;
+    }
+    setSending(true);
+    setMessage('');
+    try {
+      await axios.post('https://trace360-co.onrender.com/send-custody-pdf', {
+        email,
+        product
+      });
+      setMessage('PDF sent successfully!');
+    } catch (err) {
+      setMessage('Failed to send PDF.');
+    }
+    setSending(false);
   };
 
   return (
@@ -78,7 +91,19 @@ function ChainOfCustodyPage({ product, onBack }) {
         </table>
       </div>
       <button onClick={handlePrint} style={{ marginRight: 8 }}>Print Certificate</button>
-      <button onClick={handleEmail} style={{ marginRight: 8 }}>Email Certificate</button>
+      {/* Email input and button */}
+      <input
+        type="email"
+        placeholder="Recipient email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        style={{ marginRight: 8, padding: 6, borderRadius: 4, border: '1px solid #bbb' }}
+        disabled={sending}
+      />
+      <button onClick={handleEmail} disabled={sending} style={{ marginRight: 8 }}>
+        {sending ? 'Sending...' : 'Email Certificate'}
+      </button>
+      {message && <div style={{ marginTop: 8, color: message.includes('success') ? 'green' : 'red' }}>{message}</div>}
       <button onClick={onBack} style={{ marginTop: 16 }}>Back</button>
     </div>
   );
