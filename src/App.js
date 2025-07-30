@@ -80,31 +80,33 @@ function App() {
     setScanning(true);
     setTimeout(async () => {
       const codeReader = new BrowserMultiFormatReader();
+      let resultText = null;
       try {
         const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
-        setScanning(false);
-        codeReader.reset(); // Release camera stream held by ZXing
-        stopCamera();
-        setTraceId(result.text);
-        const found = findProduct(result.text);
-        if (found) {
-          setShowDetails(true);
-          setShowNewProductForm(false);
-          setEditProduct(null);
-        } else {
-          if (!requestPassword()) {
-            alert("Incorrect password.");
-            return;
-          }
-          setShowNewProductForm(true);
-          setShowDetails(false);
-          setEditProduct(null);
-        }
+        resultText = result.text;
       } catch (err) {
-        setScanning(false);
-        codeReader.reset(); // Release camera stream on error
-        stopCamera();
         alert('No barcode detected or camera error.');
+      } finally {
+        setScanning(false);
+        codeReader.reset();
+        stopCamera();
+        if (resultText) {
+          setTraceId(resultText);
+          const found = findProduct(resultText);
+          if (found) {
+            setShowDetails(true);
+            setShowNewProductForm(false);
+            setEditProduct(null);
+          } else {
+            if (!requestPassword()) {
+              alert("Incorrect password.");
+              return;
+            }
+            setShowNewProductForm(true);
+            setShowDetails(false);
+            setEditProduct(null);
+          }
+        }
       }
     }, 100); // Wait for video element to be in DOM
   };
