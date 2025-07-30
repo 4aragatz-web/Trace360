@@ -63,31 +63,33 @@ function App() {
   // Real barcode scan handler using camera
   const handleBarcodeScan = async () => {
     setScanning(true);
-    const codeReader = new BrowserMultiFormatReader();
-    try {
-      const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
-      setScanning(false);
-      stopCamera(videoRef);
-      setTraceId(result.text);
-      const found = findProduct(result.text);
-      if (found) {
-        setShowDetails(true);
-        setShowNewProductForm(false);
-        setEditProduct(null);
-      } else {
-        if (!requestPassword()) {
-          alert("Incorrect password.");
-          return;
+    setTimeout(async () => {
+      const codeReader = new BrowserMultiFormatReader();
+      try {
+        const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
+        setScanning(false);
+        stopCamera(videoRef);
+        setTraceId(result.text);
+        const found = findProduct(result.text);
+        if (found) {
+          setShowDetails(true);
+          setShowNewProductForm(false);
+          setEditProduct(null);
+        } else {
+          if (!requestPassword()) {
+            alert("Incorrect password.");
+            return;
+          }
+          setShowNewProductForm(true);
+          setShowDetails(false);
+          setEditProduct(null);
         }
-        setShowNewProductForm(true);
-        setShowDetails(false);
-        setEditProduct(null);
+      } catch (err) {
+        setScanning(false);
+        stopCamera(videoRef);
+        alert('No barcode detected or camera error.');
       }
-    } catch (err) {
-      setScanning(false);
-      stopCamera(videoRef);
-      alert('No barcode detected or camera error.');
-    }
+    }, 100); // Wait for video element to be in DOM
   };
 
   const handleBack = () => {
