@@ -20,16 +20,13 @@ function ChainOfCustodyPage({ product, onBack }) {
     win.print();
   };
 
-  // Download PDF using jsPDF and jspdf-autotable
+  // Download PDF using jsPDF and jspdf-autotable (fixed: only one download)
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     let y = 15;
 
-    // Add logo (centered)
-    const img = new window.Image();
-    img.src = logo;
-    img.onload = function () {
-      doc.addImage(img, 'PNG', 80, y, 50, 20); // Adjust position/size as needed
+    const generatePDF = () => {
+      doc.addImage(img, 'PNG', 80, y, 50, 20);
       y += 25;
 
       doc.setFontSize(18);
@@ -50,7 +47,6 @@ function ChainOfCustodyPage({ product, onBack }) {
       doc.text(`THC Level: ${product.thc}`, 14, y);
       y += 10;
 
-      // Table for custody history
       const tableData = product.custodyHistory && product.custodyHistory.length > 0
         ? product.custodyHistory.map(entry => [
             entry.date, entry.previousStatus, entry.newStatus
@@ -67,7 +63,14 @@ function ChainOfCustodyPage({ product, onBack }) {
 
       doc.save(`ChainOfCustody_${product.id}.pdf`);
     };
-    if (img.complete) img.onload();
+
+    const img = new window.Image();
+    img.src = logo;
+    img.onload = generatePDF;
+    if (img.complete) {
+      img.onload = null; // Prevent double call
+      generatePDF();
+    }
   };
 
   return (
@@ -118,8 +121,8 @@ function ChainOfCustodyPage({ product, onBack }) {
         </table>
       </div>
       <button onClick={handlePrint} style={{ marginRight: 8 }}>Print Certificate</button>
-      <button onClick={handleDownloadPDF} style={{ marginRight: 8 }}>Download PDF</button>
-      <button onClick={onBack} style={{ marginTop: 16 }}>Back</button>
+      <button onClick={handleDownloadPDF}>Download PDF</button>
+      <button onClick={onBack} style={{ marginLeft: 8 }}>Back</button>
     </div>
   );
 }
