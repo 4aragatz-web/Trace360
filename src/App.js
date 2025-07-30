@@ -22,6 +22,11 @@ const stopCamera = (videoRef) => {
   }
 };
 
+// Helper to detect mobile devices
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+
 function App() {
   const [traceId, setTraceId] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -132,15 +137,17 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Video background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="background-video"
-        src="/background.mp4"
-      />
+      {/* Only show background video on non-mobile devices */}
+      {!isMobile() && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="background-video"
+          src="/background.mp4"
+        />
+      )}
       <img src={logo} alt="Company Logo" style={{ height: 60, marginBottom: 16, position: 'relative', zIndex: 1 }} />
       <HomeScreen />
       <div style={{ marginTop: 32, position: 'relative', zIndex: 1 }}>
