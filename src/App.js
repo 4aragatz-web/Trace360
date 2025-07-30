@@ -1,11 +1,12 @@
 const EDIT_PASSWORD = "hemp123";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import HomeScreen from './HomeScreen';
 import ProductDetail from './ProductDetail';
 import NewProductForm from './NewProductForm';
 import ChainOfCustodyPage from './ChainOfCustodyPage';
 import logo from './logo.png';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 const requestPassword = () => {
   const input = window.prompt("Enter password to edit or add a product:");
@@ -19,6 +20,8 @@ function App() {
   const [showNewProductForm, setShowNewProductForm] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     axios.get('https://trace360-co.onrender.com/products')
@@ -48,22 +51,31 @@ function App() {
     }
   };
 
-  const handleBarcodeScan = () => {
-    const simulatedBarcode = 'NEW987654321';
-    setTraceId(simulatedBarcode);
-    const found = findProduct(simulatedBarcode);
-    if (found) {
-      setShowDetails(true);
-      setShowNewProductForm(false);
-      setEditProduct(null);
-    } else {
-      if (!requestPassword()) {
-        alert("Incorrect password.");
-        return;
+  // Real barcode scan handler using camera
+  const handleBarcodeScan = async () => {
+    setScanning(true);
+    const codeReader = new BrowserMultiFormatReader();
+    try {
+      const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
+      setScanning(false);
+      setTraceId(result.text);
+      const found = findProduct(result.text);
+      if (found) {
+        setShowDetails(true);
+        setShowNewProductForm(false);
+        setEditProduct(null);
+      } else {
+        if (!requestPassword()) {
+          alert("Incorrect password.");
+          return;
+        }
+        setShowNewProductForm(true);
+        setShowDetails(false);
+        setEditProduct(null);
       }
-      setShowNewProductForm(true);
-      setShowDetails(false);
-      setEditProduct(null);
+    } catch (err) {
+      setScanning(false);
+      alert('No barcode detected or camera error.');
     }
   };
 
@@ -121,7 +133,15 @@ function App() {
         {!showDetails && !showNewProductForm && !showChainOfCustody ? (
           <>
             <h2>Scan Barcode</h2>
-            <button onClick={handleBarcodeScan}>Scan Barcode (Simulated)</button>
+            {!scanning && (
+              <button onClick={handleBarcodeScan}>Scan Barcode</button>
+            )}
+            {scanning && (
+              <div>
+                <video ref={videoRef} style={{ width: 300, height: 200 }} />
+                <p>Point your camera at a barcode...</p>
+              </div>
+            )}
             <form onSubmit={handleManualSubmit} style={{ marginTop: 16 }}>
               <label>
                 Or enter Trace ID manually:
