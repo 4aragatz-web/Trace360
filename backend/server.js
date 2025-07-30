@@ -74,12 +74,14 @@ app.post('/send-custody-pdf', async (req, res) => {
 
     // 2. Send email with PDF attachment
     let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+  host: 'smtp.office365.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
     let mailOptions = {
       from: process.env.EMAIL_USER,
