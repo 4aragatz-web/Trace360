@@ -13,6 +13,15 @@ const requestPassword = () => {
   return input === EDIT_PASSWORD;
 };
 
+// Helper to stop camera stream
+const stopCamera = (videoRef) => {
+  if (videoRef.current && videoRef.current.srcObject) {
+    const tracks = videoRef.current.srcObject.getTracks();
+    tracks.forEach(track => track.stop());
+    videoRef.current.srcObject = null;
+  }
+};
+
 function App() {
   const [traceId, setTraceId] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -58,6 +67,7 @@ function App() {
     try {
       const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
       setScanning(false);
+      stopCamera(videoRef);
       setTraceId(result.text);
       const found = findProduct(result.text);
       if (found) {
@@ -75,6 +85,7 @@ function App() {
       }
     } catch (err) {
       setScanning(false);
+      stopCamera(videoRef);
       alert('No barcode detected or camera error.');
     }
   };
@@ -85,6 +96,7 @@ function App() {
     setEditProduct(null);
     setShowChainOfCustody(false);
     setTraceId('');
+    stopCamera(videoRef);
   };
 
   const handleSaveNewProduct = (newProduct) => {
@@ -137,14 +149,28 @@ function App() {
               <button onClick={handleBarcodeScan}>Scan Barcode</button>
             )}
             {scanning && (
-              <div style={{ position: 'relative', width: 300, height: 200 }}>
-                <video ref={videoRef} style={{ width: 300, height: 200 }} />
+              <div
+                style={{
+                  position: 'relative',
+                  width: 320,
+                  height: 240,
+                  margin: '0 auto',
+                  background: '#222',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 12px #0008',
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <video ref={videoRef} style={{ width: 300, height: 200, borderRadius: 8 }} />
                 {/* Overlay rectangle for barcode alignment */}
                 <div
                   style={{
                     position: 'absolute',
                     top: 60,
-                    left: 50,
+                    left: 60,
                     width: 200,
                     height: 40,
                     border: '2px solid #00FF00',
