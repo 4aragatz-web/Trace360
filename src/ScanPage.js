@@ -17,18 +17,21 @@ function ScanPage({ onScan, onCancel }) {
   useEffect(() => {
     let codeReader = new BrowserMultiFormatReader();
     let active = true;
+    let controls;
 
     async function startScan() {
       try {
-        const result = await codeReader.decodeOnceFromVideoDevice(
+        controls = await codeReader.decodeFromVideoDevice(
           { facingMode: "environment" },
-          videoRef.current
+          videoRef.current,
+          (result, err, controls) => {
+            if (result && active) {
+              codeReader.reset();
+              stopCamera();
+              onScan(result.getText());
+            }
+          }
         );
-        if (active) {
-          codeReader.reset();
-          stopCamera();
-          onScan(result.text);
-        }
       } catch (err) {
         if (active) {
           codeReader.reset();
@@ -39,12 +42,16 @@ function ScanPage({ onScan, onCancel }) {
       }
     }
 
-    startScan();
+    // Wait for video element to be in DOM
+    if (videoRef.current) {
+      startScan();
+    }
 
     return () => {
       active = false;
       codeReader.reset();
       stopCamera();
+      if (controls && controls.stop) controls.stop();
     };
   }, [onScan, onCancel]);
 
@@ -66,7 +73,13 @@ function ScanPage({ onScan, onCancel }) {
           justifyContent: 'center',
         }}
       >
-        <video ref={videoRef} style={{ width: 300, height: 200, borderRadius: 8 }} />
+        <video
+          ref={videoRef}
+          style={{ width: 300, height: 200, borderRadius: 8 }}
+          autoPlay
+          muted
+          playsInline
+        />
         {/* Overlay rectangle for barcode alignment */}
         <div
           style={{
