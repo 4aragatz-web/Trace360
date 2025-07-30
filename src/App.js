@@ -83,6 +83,7 @@ function App() {
       try {
         const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
         setScanning(false);
+        codeReader.reset(); // Release camera stream held by ZXing
         stopCamera();
         setTraceId(result.text);
         const found = findProduct(result.text);
@@ -101,6 +102,7 @@ function App() {
         }
       } catch (err) {
         setScanning(false);
+        codeReader.reset(); // Release camera stream on error
         stopCamera();
         alert('No barcode detected or camera error.');
       }
