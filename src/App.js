@@ -39,12 +39,6 @@ function App() {
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef(null);
 
-  // Use a ref to always have the latest products in async handlers
-  const productsRef = useRef(products);
-  useEffect(() => {
-    productsRef.current = products;
-  }, [products]);
-
   useEffect(() => {
     axios.get('https://trace360-co.onrender.com/products')
       .then(res => setProducts(res.data))
@@ -59,7 +53,7 @@ function App() {
     };
   }, [scanning]);
 
-  const findProduct = (id) => productsRef.current.find(p => String(p.id) === String(id));
+  const findProduct = (id) => products.find(p => p.id === id);
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
@@ -86,33 +80,29 @@ function App() {
     setScanning(true);
     setTimeout(async () => {
       const codeReader = new BrowserMultiFormatReader();
-      let resultText = null;
       try {
         const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
-        resultText = result.text;
-      } catch (err) {
-        alert('No barcode detected or camera error.');
-      } finally {
         setScanning(false);
-        codeReader.reset();
         stopCamera();
-        if (resultText) {
-          setTraceId(resultText);
-          const found = findProduct(resultText);
-          if (found) {
-            setShowDetails(true);
-            setShowNewProductForm(false);
-            setEditProduct(null);
-          } else {
-            if (!requestPassword()) {
-              alert("Incorrect password.");
-              return;
-            }
-            setShowNewProductForm(true);
-            setShowDetails(false);
-            setEditProduct(null);
+        setTraceId(result.text);
+        const found = findProduct(result.text);
+        if (found) {
+          setShowDetails(true);
+          setShowNewProductForm(false);
+          setEditProduct(null);
+        } else {
+          if (!requestPassword()) {
+            alert("Incorrect password.");
+            return;
           }
+          setShowNewProductForm(true);
+          setShowDetails(false);
+          setEditProduct(null);
         }
+      } catch (err) {
+        setScanning(false);
+        stopCamera();
+        alert('No barcode detected or camera error.');
       }
     }, 100); // Wait for video element to be in DOM
   };
@@ -264,5 +254,5 @@ function App() {
       </div>
     </div>
   );
-} 
+}
 export default App;
