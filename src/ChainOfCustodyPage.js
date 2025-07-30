@@ -22,8 +22,17 @@ function ChainOfCustodyPage({ product, onBack }) {
 
   // Download PDF using jsPDF and jspdf-autotable
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    let y = 15;
+  const doc = new jsPDF();
+  if (typeof doc.autoTable !== "function") {
+    alert("autoTable is NOT available!");
+    return;
+  }
+  doc.autoTable({
+    head: [['Test']],
+    body: [['It works!']],
+  });
+  doc.save('test.pdf');
+};
 
     // Add logo (centered)
     const img = new window.Image();
@@ -123,6 +132,6 @@ function ChainOfCustodyPage({ product, onBack }) {
       <button onClick={onBack} style={{ marginTop: 16 }}>Back</button>
     </div>
   );
-}
+
 
 export default ChainOfCustodyPage;
