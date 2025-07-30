@@ -13,13 +13,15 @@ const requestPassword = () => {
   return input === EDIT_PASSWORD;
 };
 
-// Helper to stop camera stream
-const stopCamera = (videoRef) => {
-  if (videoRef.current && videoRef.current.srcObject) {
-    const tracks = videoRef.current.srcObject.getTracks();
-    tracks.forEach(track => track.stop());
-    videoRef.current.srcObject = null;
-  }
+// Improved helper to stop all camera streams on the page
+const stopCamera = () => {
+  const videos = document.querySelectorAll('video');
+  videos.forEach(video => {
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+  });
 };
 
 // Helper to detect mobile devices
@@ -47,7 +49,7 @@ function App() {
   useEffect(() => {
     if (!scanning) return;
     return () => {
-      stopCamera(videoRef);
+      stopCamera();
     };
   }, [scanning]);
 
@@ -81,7 +83,7 @@ function App() {
       try {
         const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
         setScanning(false);
-        stopCamera(videoRef);
+        stopCamera();
         setTraceId(result.text);
         const found = findProduct(result.text);
         if (found) {
@@ -99,7 +101,7 @@ function App() {
         }
       } catch (err) {
         setScanning(false);
-        stopCamera(videoRef);
+        stopCamera();
         alert('No barcode detected or camera error.');
       }
     }, 100); // Wait for video element to be in DOM
@@ -111,7 +113,7 @@ function App() {
     setEditProduct(null);
     setShowChainOfCustody(false);
     setTraceId('');
-    stopCamera(videoRef);
+    stopCamera();
   };
 
   const handleSaveNewProduct = (newProduct) => {
@@ -252,5 +254,5 @@ function App() {
       </div>
     </div>
   );
-} 
+}
 export default App;
