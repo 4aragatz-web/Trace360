@@ -137,9 +137,33 @@ function App() {
               <button onClick={handleBarcodeScan}>Scan Barcode</button>
             )}
             {scanning && (
-              <div>
+              <div style={{ position: 'relative', width: 300, height: 200 }}>
                 <video ref={videoRef} style={{ width: 300, height: 200 }} />
-                <p>Point your camera at a barcode...</p>
+                {/* Overlay rectangle for barcode alignment */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 60,
+                    left: 50,
+                    width: 200,
+                    height: 40,
+                    border: '2px solid #00FF00',
+                    borderRadius: 8,
+                    pointerEvents: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <p style={{
+                  position: 'absolute',
+                  top: 110,
+                  left: 0,
+                  width: '100%',
+                  textAlign: 'center',
+                  color: '#fff',
+                  textShadow: '0 0 4px #000'
+                }}>
+                  Line up the barcode inside the box
+                </p>
               </div>
             )}
             <form onSubmit={handleManualSubmit} style={{ marginTop: 16 }}>
