@@ -6,92 +6,8 @@ import ProductDetail from './ProductDetail';
 import NewProductForm from './NewProductForm';
 import ChainOfCustodyPage from './ChainOfCustodyPage';
 import logo from './logo.png';
-import { BrowserMultiFormatReader } from '@zxing/browser';
-
-// --- ScanPage Component ---
-function ScanPage({ onScan, onCancel }) {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    let codeReader = new BrowserMultiFormatReader();
-    let active = true;
-
-    async function startScan() {
-      try {
-        const result = await codeReader.decodeOnceFromVideoDevice(undefined, videoRef.current);
-        if (active) {
-          codeReader.reset();
-          stopCamera();
-          onScan(result.text);
-        }
-      } catch (err) {
-        if (active) {
-          codeReader.reset();
-          stopCamera();
-          alert('No barcode detected or camera error.');
-          onCancel();
-        }
-      }
-    }
-
-    startScan();
-
-    return () => {
-      active = false;
-      codeReader.reset();
-      stopCamera();
-    };
-  }, [onScan, onCancel]);
-
-  return (
-    <div style={{ textAlign: 'center', marginTop: 40 }}>
-      <h2>Scan Barcode</h2>
-      <div
-        style={{
-          position: 'relative',
-          width: 320,
-          height: 240,
-          margin: '0 auto',
-          background: '#222',
-          borderRadius: 12,
-          boxShadow: '0 2px 12px #0008',
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <video ref={videoRef} style={{ width: 300, height: 200, borderRadius: 8 }} />
-        {/* Overlay rectangle for barcode alignment */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 60,
-            left: 60,
-            width: 200,
-            height: 40,
-            border: '2px solid #00FF00',
-            borderRadius: 8,
-            pointerEvents: 'none',
-            boxSizing: 'border-box',
-          }}
-        />
-        <p style={{
-          position: 'absolute',
-          top: 110,
-          left: 0,
-          width: '100%',
-          textAlign: 'center',
-          color: '#fff',
-          textShadow: '0 0 4px #000'
-        }}>
-          Line up the barcode inside the box
-        </p>
-      </div>
-      <button onClick={onCancel} style={{ marginTop: 24 }}>Cancel</button>
-    </div>
-  );
-}
+// REMOVE the import for BrowserMultiFormatReader here
+import ScanPage from './ScanPage'; // <-- Import the new ScanPage component
 
 // --- Helper functions ---
 const requestPassword = () => {
@@ -241,7 +157,7 @@ function App() {
             <button onClick={() => setShowScanPage(true)}>Scan Barcode</button>
             <form onSubmit={handleManualSubmit} style={{ marginTop: 16 }}>
               <label>
-                Or enter Trace ID manually:
+                  Or enter Trace ID manually:
                 <input
                   type="text"
                   value={traceId}
@@ -269,7 +185,7 @@ function App() {
               onBack={handleBack}
             />
           </>
-        ) : (
+          ) : (
           <>
             <NewProductForm
               traceId={traceId}
