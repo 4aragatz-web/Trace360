@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import logo from './logo.png';
 
 function ChainOfCustodyPage({ product, onBack }) {
@@ -22,17 +22,8 @@ function ChainOfCustodyPage({ product, onBack }) {
 
   // Download PDF using jsPDF and jspdf-autotable
   const handleDownloadPDF = () => {
-  const doc = new jsPDF();
-  if (typeof doc.autoTable !== "function") {
-    alert("autoTable is NOT available!");
-    return;
-  }
-  doc.autoTable({
-    head: [['Test']],
-    body: [['It works!']],
-  });
-  doc.save('test.pdf');
-};
+    const doc = new jsPDF();
+    let y = 15;
 
     // Add logo (centered)
     const img = new window.Image();
@@ -66,7 +57,7 @@ function ChainOfCustodyPage({ product, onBack }) {
           ])
         : [['-', '-', '-']];
 
-      doc.autoTable({
+      autoTable(doc, {
         head: [['Date', 'Previous Status', 'New Status']],
         body: tableData,
         startY: y,
@@ -76,7 +67,6 @@ function ChainOfCustodyPage({ product, onBack }) {
 
       doc.save(`ChainOfCustody_${product.id}.pdf`);
     };
-    // If logo is already loaded (from cache), trigger onload manually
     if (img.complete) img.onload();
   };
 
@@ -132,6 +122,6 @@ function ChainOfCustodyPage({ product, onBack }) {
       <button onClick={onBack} style={{ marginTop: 16 }}>Back</button>
     </div>
   );
-
+}
 
 export default ChainOfCustodyPage;
