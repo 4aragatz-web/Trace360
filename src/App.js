@@ -39,6 +39,12 @@ function App() {
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef(null);
 
+  // Use a ref to always have the latest products in async handlers
+  const productsRef = useRef(products);
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
+
   useEffect(() => {
     axios.get('https://trace360-co.onrender.com/products')
       .then(res => setProducts(res.data))
@@ -53,7 +59,7 @@ function App() {
     };
   }, [scanning]);
 
-  const findProduct = (id) => products.find(p => p.id === id);
+  const findProduct = (id) => productsRef.current.find(p => String(p.id) === String(id));
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
@@ -258,5 +264,5 @@ function App() {
       </div>
     </div>
   );
-}
+} 
 export default App;
