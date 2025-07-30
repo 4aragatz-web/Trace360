@@ -43,6 +43,14 @@ function App() {
       .catch(err => console.error(err));
   }, []);
 
+  // Always stop camera when scanning ends or component unmounts
+  useEffect(() => {
+    if (!scanning) return;
+    return () => {
+      stopCamera(videoRef);
+    };
+  }, [scanning]);
+
   const findProduct = (id) => products.find(p => p.id === id);
 
   const handleManualSubmit = (e) => {
@@ -244,5 +252,5 @@ function App() {
       </div>
     </div>
   );
-}
+} 
 export default App;
