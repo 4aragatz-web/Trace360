@@ -76,6 +76,7 @@ function App() {
           { video: { facingMode: "environment" } },
           videoRef.current,
           (result, err) => {
+            console.log("Scan callback fired", { result, err });
             if (result && active) {
               active = false;
               if (controls && controls.stop) controls.stop();
