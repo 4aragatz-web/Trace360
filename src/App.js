@@ -42,10 +42,12 @@ function App() {
 
   const findProduct = (id) => productsRef.current.find(p => String(p.id) === String(id));
 
-  const handleManualSubmit = (e) => {
-    e.preventDefault();
-    if (traceId.trim()) {
-      const found = findProduct(traceId.trim());
+  // Updated handleManualSubmit to accept barcodeOverride
+  const handleManualSubmit = (e, barcodeOverride) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const idToCheck = barcodeOverride || traceId.trim();
+    if (idToCheck) {
+      const found = findProduct(idToCheck);
       if (found) {
         setShowDetails(true);
         setShowNewProductForm(false);
@@ -81,7 +83,7 @@ function App() {
               console.log("Scanned barcode:", result.getText());
               active = false;
               if (controls && controls.stop) controls.stop();
-              codeReader.reset();
+              if (codeReader && typeof codeReader.reset === "function") codeReader.reset();
               if (videoRef.current && videoRef.current.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                 videoRef.current.srcObject = null;
@@ -90,7 +92,7 @@ function App() {
               setShowScanPage(false);
               setTraceId(cleanBarcode);
               setTimeout(() => {
-                handleManualSubmit({ preventDefault: () => {} });
+                handleManualSubmit({ preventDefault: () => {} }, cleanBarcode);
               }, 0);
             }
           }
@@ -98,7 +100,7 @@ function App() {
       } catch (err) {
         if (active) {
           if (controls && controls.stop) controls.stop();
-          codeReader.reset();
+          if (codeReader && typeof codeReader.reset === "function") codeReader.reset();
           if (videoRef.current && videoRef.current.srcObject) {
             videoRef.current.srcObject.getTracks().forEach(track => track.stop());
             videoRef.current.srcObject = null;
@@ -114,7 +116,7 @@ function App() {
     return () => {
       active = false;
       if (controls && controls.stop) controls.stop();
-      if (codeReader) codeReader.reset();
+      if (codeReader && typeof codeReader.reset === "function") codeReader.reset();
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getTracks().forEach(track => track.stop());
         videoRef.current.srcObject = null;
