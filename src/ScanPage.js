@@ -24,6 +24,8 @@ function ScanPage({ onScan, onCancel }) {
                 videoRef.current.srcObject = null;
               }
               console.log("ScanPage: scanned value", result.getText()); // <--- LOG HERE
+              // Alert for debugging if scan callback is firing
+              alert("Scanned: " + result.getText());
               onScan(result.getText());
             }
           }
