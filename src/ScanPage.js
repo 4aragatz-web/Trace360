@@ -1,63 +1,33 @@
 import React, { useEffect, useRef } from 'react';
-import { BrowserMultiFormatReader } from '@zxing/browser';
-
-const stopCamera = () => {
-  const videos = document.querySelectorAll('video');
-  videos.forEach(video => {
-    if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
-    }
-  });
-};
 
 function ScanPage({ onScan, onCancel }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    let codeReader = new BrowserMultiFormatReader();
-    let active = true;
-    let controls;
-
-    async function startScan() {
+    let stream;
+    async function startCamera() {
       try {
-        controls = await codeReader.decodeFromVideoDevice(
-          { facingMode: "environment" },
-          videoRef.current,
-          (result, err, controls) => {
-            if (result && active) {
-              codeReader.reset();
-              stopCamera();
-              onScan(result.getText());
-            }
-          }
-        );
-      } catch (err) {
-        if (active) {
-          codeReader.reset();
-          stopCamera();
-          alert('No barcode detected or camera error.');
-          onCancel();
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
         }
+      } catch (err) {
+        alert('Camera error: ' + err.message);
+        onCancel();
       }
     }
-
-    // Wait for video element to be in DOM
-    if (videoRef.current) {
-      startScan();
-    }
+    startCamera();
 
     return () => {
-      active = false;
-      codeReader.reset();
-      stopCamera();
-      if (controls && controls.stop) controls.stop();
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, [onScan, onCancel]);
+  }, [onCancel]);
 
   return (
     <div style={{ textAlign: 'center', marginTop: 40 }}>
-      <h2>Scan Barcode</h2>
+      <h2>Camera Preview Test</h2>
       <div
         style={{
           position: 'relative',
@@ -80,7 +50,6 @@ function ScanPage({ onScan, onCancel }) {
           muted
           playsInline
         />
-        {/* Overlay rectangle for barcode alignment */}
         <div
           style={{
             position: 'absolute',
@@ -94,17 +63,6 @@ function ScanPage({ onScan, onCancel }) {
             boxSizing: 'border-box',
           }}
         />
-        <p style={{
-          position: 'absolute',
-          top: 110,
-          left: 0,
-          width: '100%',
-          textAlign: 'center',
-          color: '#fff',
-          textShadow: '0 0 4px #000'
-        }}>
-          Line up the barcode inside the box
-        </p>
       </div>
       <button onClick={onCancel} style={{ marginTop: 24 }}>Cancel</button>
     </div>
