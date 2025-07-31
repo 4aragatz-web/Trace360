@@ -78,6 +78,7 @@ function App() {
           (result, err) => {
             console.log("Scan callback fired", { result, err });
             if (result && active) {
+              console.log("Scanned barcode:", result.getText());
               active = false;
               if (controls && controls.stop) controls.stop();
               codeReader.reset();
