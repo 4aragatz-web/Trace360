@@ -36,6 +36,7 @@ function App() {
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
   const [showScanPage, setShowScanPage] = useState(false);
+  const [dummy, setDummy] = useState(0); // Dummy state for force re-render
 
   // Use a ref to always have the latest products in async handlers
   const productsRef = useRef(products);
@@ -74,10 +75,12 @@ function App() {
   // Called when scan is successful
   const handleScanResult = (barcode) => {
     // Clean and log the scanned barcode
-    const cleanBarcode = String(barcode).trim();
+    const cleanBarcode = String(barcode).trim().replace(/[\r\n]+/g, '');
     console.log("handleScanResult called with (cleaned):", cleanBarcode);
+    console.log("Character codes:", cleanBarcode.split('').map(c => c.charCodeAt(0)));
     setShowScanPage(false);
     setTraceId(cleanBarcode);
+    setDummy(d => d + 1); // Force re-render
 
     // Debug: log products and found product
     console.log("Products:", productsRef.current);
