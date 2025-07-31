@@ -14,16 +14,6 @@ const requestPassword = () => {
   return input === EDIT_PASSWORD;
 };
 
-const stopCamera = () => {
-  const videos = document.querySelectorAll('video');
-  videos.forEach(video => {
-    if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
-    }
-  });
-};
-
 function isMobile() {
   return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 }
@@ -36,7 +26,6 @@ function App() {
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
   const [showScanPage, setShowScanPage] = useState(false);
-  const [dummy, setDummy] = useState(0); // Dummy state for force re-render
 
   // Use a ref to always have the latest products in async handlers
   const productsRef = useRef(products);
@@ -74,35 +63,12 @@ function App() {
 
   // Called when scan is successful
   const handleScanResult = (barcode) => {
-    console.log("handleScanResult fired with barcode:", barcode); // Step 2: First log
-
-    // Step 2: Clean and log the scanned barcode
     const cleanBarcode = String(barcode).trim().replace(/[\r\n]+/g, '');
-    console.log("handleScanResult called with (cleaned):", cleanBarcode);
-    console.log("Character codes:", cleanBarcode.split('').map(c => c.charCodeAt(0)));
-
     setShowScanPage(false);
     setTraceId(cleanBarcode);
-    setDummy(d => d + 1); // Force re-render
-
-    // Step 2: Log products and found product
-    console.log("Products:", productsRef.current);
-    const found = findProduct(cleanBarcode);
-    console.log("Found product:", found);
-
-    if (found) {
-      setShowDetails(true);
-      setShowNewProductForm(false);
-      setEditProduct(null);
-    } else {
-      if (!requestPassword()) {
-        alert("Incorrect password.");
-        return;
-      }
-      setShowNewProductForm(true);
-      setShowDetails(false);
-      setEditProduct(null);
-    }
+    setTimeout(() => {
+      handleManualSubmit({ preventDefault: () => {} });
+    }, 0);
   };
 
   const handleBack = () => {
