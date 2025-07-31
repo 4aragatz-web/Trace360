@@ -1,33 +1,62 @@
 import React, { useEffect, useRef } from 'react';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 function ScanPage({ onScan, onCancel }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    let stream;
-    async function startCamera() {
+    let codeReader = new BrowserMultiFormatReader();
+    let controls;
+    let active = true;
+
+    async function startScan() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        controls = await codeReader.decodeFromVideoDevice(
+          { facingMode: "environment" },
+          videoRef.current,
+          (result, err) => {
+            if (result && active) {
+              codeReader.reset();
+              if (controls && controls.stop) controls.stop();
+              // Stop camera stream
+              if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+              }
+              onScan(result.getText());
+            }
+          }
+        );
       } catch (err) {
-        alert('Camera error: ' + err.message);
-        onCancel();
+        if (active) {
+          codeReader.reset();
+          if (controls && controls.stop) controls.stop();
+          if (videoRef.current && videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+          }
+          alert('No barcode detected or camera error.');
+          onCancel();
+        }
       }
     }
-    startCamera();
+
+    startScan();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      active = false;
+      codeReader.reset();
+      if (controls && controls.stop) controls.stop();
+      if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
       }
     };
-  }, [onCancel]);
+  }, [onScan, onCancel]);
 
   return (
     <div style={{ textAlign: 'center', marginTop: 40 }}>
-      <h2>Camera Preview Test</h2>
+      <h2>Scan Barcode</h2>
       <div
         style={{
           position: 'relative',
@@ -50,6 +79,7 @@ function ScanPage({ onScan, onCancel }) {
           muted
           playsInline
         />
+        {/* Overlay rectangle for barcode alignment */}
         <div
           style={{
             position: 'absolute',
@@ -63,6 +93,17 @@ function ScanPage({ onScan, onCancel }) {
             boxSizing: 'border-box',
           }}
         />
+        <p style={{
+          position: 'absolute',
+          top: 110,
+          left: 0,
+          width: '100%',
+          textAlign: 'center',
+          color: '#fff',
+          textShadow: '0 0 4px #000'
+        }}>
+          Align the barcode within the frame
+        </p>
       </div>
       <button onClick={onCancel} style={{ marginTop: 24 }}>Cancel</button>
     </div>
