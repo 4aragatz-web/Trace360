@@ -6,19 +6,19 @@ function ScanPage({ onScan, onCancel }) {
 
   useEffect(() => {
     let codeReader = new BrowserMultiFormatReader();
-    let controls;
     let active = true;
+    let controls;
 
     async function startScan() {
       try {
-        controls = await codeReader.decodeFromVideoDevice(
-          { facingMode: "environment" },
+        controls = await codeReader.decodeFromConstraints(
+          { video: { facingMode: "environment" } },
           videoRef.current,
           (result, err) => {
             if (result && active) {
-              codeReader.reset();
+              active = false;
               if (controls && controls.stop) controls.stop();
-              // Stop camera stream
+              codeReader.reset();
               if (videoRef.current && videoRef.current.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                 videoRef.current.srcObject = null;
@@ -29,8 +29,8 @@ function ScanPage({ onScan, onCancel }) {
         );
       } catch (err) {
         if (active) {
-          codeReader.reset();
           if (controls && controls.stop) controls.stop();
+          codeReader.reset();
           if (videoRef.current && videoRef.current.srcObject) {
             videoRef.current.srcObject.getTracks().forEach(track => track.stop());
             videoRef.current.srcObject = null;
@@ -45,8 +45,8 @@ function ScanPage({ onScan, onCancel }) {
 
     return () => {
       active = false;
-      codeReader.reset();
       if (controls && controls.stop) controls.stop();
+      codeReader.reset();
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getTracks().forEach(track => track.stop());
         videoRef.current.srcObject = null;
@@ -57,21 +57,19 @@ function ScanPage({ onScan, onCancel }) {
   return (
     <div style={{ textAlign: 'center', marginTop: 40 }}>
       <h2>Scan Barcode</h2>
-      <div
-        style={{
-          position: 'relative',
-          width: 320,
-          height: 240,
-          margin: '0 auto',
-          background: '#222',
-          borderRadius: 12,
-          boxShadow: '0 2px 12px #0008',
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{
+        position: 'relative',
+        width: 320,
+        height: 240,
+        margin: '0 auto',
+        background: '#222',
+        borderRadius: 12,
+        boxShadow: '0 2px 12px #0008',
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <video
           ref={videoRef}
           style={{ width: 300, height: 200, borderRadius: 8 }}
@@ -79,7 +77,6 @@ function ScanPage({ onScan, onCancel }) {
           muted
           playsInline
         />
-        {/* Overlay rectangle for barcode alignment */}
         <div
           style={{
             position: 'absolute',
@@ -102,7 +99,7 @@ function ScanPage({ onScan, onCancel }) {
           color: '#fff',
           textShadow: '0 0 4px #000'
         }}>
-          Align the barcode within the frame
+          Line up the barcode inside the box
         </p>
       </div>
       <button onClick={onCancel} style={{ marginTop: 24 }}>Cancel</button>
