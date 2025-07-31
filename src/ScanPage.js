@@ -23,8 +23,7 @@ function ScanPage({ onScan, onCancel }) {
                 videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                 videoRef.current.srcObject = null;
               }
-              // Debug: log the scanned barcode
-              console.log("Scanned barcode:", result.getText());
+              // Pass the scanned barcode to the parent (App.js)
               onScan(result.getText());
             }
           }
