@@ -135,10 +135,12 @@ function App() {
             <h2>Scan Barcode</h2>
             <button onClick={() => setShowScanPage(true)}>Scan Barcode</button>
             <form onSubmit={handleManualSubmit} style={{ marginTop: 16 }}>
-              <label>
+              <label htmlFor="traceId">
                 Or enter Trace ID manually:
                 <input
                   type="text"
+                  id="traceId"
+                  name="traceId"
                   value={traceId}
                   onChange={(e) => setTraceId(e.target.value)}
                   placeholder="e.g. 123456789"
