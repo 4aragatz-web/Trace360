@@ -74,7 +74,7 @@ function App() {
 
   // Called when scan is successful
   const handleScanResult = (barcode) => {
-    alert("Scanned! Barcode: " + barcode); // Step 1: Confirm callback fires
+    console.log("handleScanResult fired with barcode:", barcode); // Step 2: First log
 
     // Step 2: Clean and log the scanned barcode
     const cleanBarcode = String(barcode).trim().replace(/[\r\n]+/g, '');
