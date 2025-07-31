@@ -6,7 +6,6 @@ import ProductDetail from './ProductDetail';
 import NewProductForm from './NewProductForm';
 import ChainOfCustodyPage from './ChainOfCustodyPage';
 import logo from './logo.png';
-// REMOVE the import for BrowserMultiFormatReader here
 import ScanPage from './ScanPage'; // <-- Import the new ScanPage component
 
 // --- Helper functions ---
@@ -74,9 +73,15 @@ function App() {
 
   // Called when scan is successful
   const handleScanResult = (barcode) => {
+    console.log("handleScanResult called with:", barcode); // Debug log
     setShowScanPage(false);
     setTraceId(barcode);
+
+    // Debug: log products and found product
+    console.log("Products:", productsRef.current);
     const found = findProduct(barcode);
+    console.log("Found product:", found);
+
     if (found) {
       setShowDetails(true);
       setShowNewProductForm(false);
@@ -157,7 +162,7 @@ function App() {
             <button onClick={() => setShowScanPage(true)}>Scan Barcode</button>
             <form onSubmit={handleManualSubmit} style={{ marginTop: 16 }}>
               <label>
-                  Or enter Trace ID manually:
+                Or enter Trace ID manually:
                 <input
                   type="text"
                   value={traceId}
@@ -185,7 +190,7 @@ function App() {
               onBack={handleBack}
             />
           </>
-          ) : (
+        ) : (
           <>
             <NewProductForm
               traceId={traceId}
