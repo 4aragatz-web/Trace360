@@ -74,15 +74,18 @@ function App() {
 
   // Called when scan is successful
   const handleScanResult = (barcode) => {
-    // Clean and log the scanned barcode
+    alert("Scanned! Barcode: " + barcode); // Step 1: Confirm callback fires
+
+    // Step 2: Clean and log the scanned barcode
     const cleanBarcode = String(barcode).trim().replace(/[\r\n]+/g, '');
     console.log("handleScanResult called with (cleaned):", cleanBarcode);
     console.log("Character codes:", cleanBarcode.split('').map(c => c.charCodeAt(0)));
+
     setShowScanPage(false);
     setTraceId(cleanBarcode);
     setDummy(d => d + 1); // Force re-render
 
-    // Debug: log products and found product
+    // Step 2: Log products and found product
     console.log("Products:", productsRef.current);
     const found = findProduct(cleanBarcode);
     console.log("Found product:", found);
