@@ -162,6 +162,12 @@ function App() {
     setShowNewProductForm(false);
   };
 
+  const handleUpdateProduct = (updatedProduct) => {
+    setProducts(products =>
+      products.map(p => String(p.id) === String(updatedProduct.id) ? updatedProduct : p)
+    );
+  };
+
   // --- Main Render ---
   return (
     <div className="app-container">
@@ -255,6 +261,7 @@ function App() {
               product={findProduct(traceId)}
               onEdit={handleEdit}
               onShowChainOfCustody={handleShowChainOfCustody}
+              onUpdateProduct={handleUpdateProduct}
             />
             <button onClick={handleBack} style={{ marginTop: 16 }}>Back to Scanner</button>
           </>
@@ -263,6 +270,7 @@ function App() {
             <ChainOfCustodyPage
               product={findProduct(traceId)}
               onBack={handleBack}
+              onUpdateProduct={handleUpdateProduct}
             />
           </>
         ) : (
