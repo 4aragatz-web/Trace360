@@ -3,12 +3,22 @@ import React, { useState } from 'react';
 const EDIT_PASSWORD = "hemp123";
 
 function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct }) {
+  const [showStatusForm, setShowStatusForm] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [location, setLocation] = useState('');
 
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
   }
+
+  const handleShowStatusForm = () => {
+    const input = window.prompt("Enter password to change status:");
+    if (input === EDIT_PASSWORD) {
+      setShowStatusForm(true);
+    } else {
+      alert("Incorrect password.");
+    }
+  };
 
   const handleStatusChange = () => {
     if (!newStatus) {
@@ -35,6 +45,7 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
     onUpdateProduct(updatedProduct);
     setNewStatus('');
     setLocation('');
+    setShowStatusForm(false);
   };
 
   return (
@@ -68,25 +79,35 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
         <span className="form-label">Current Status:</span>
         <span className="form-input">{product.currentStatus}</span>
       </div>
-      <div style={{ marginTop: 16 }}>
-        <input
-          type="text"
-          placeholder="Enter new status"
-          value={newStatus}
-          onChange={e => setNewStatus(e.target.value)}
-          style={{ marginRight: 8 }}
-        />
-        <input
-          type="text"
-          placeholder="Enter location"
-          value={location}
-          onChange={e => setLocation(e.target.value)}
-          style={{ marginRight: 8 }}
-        />
-        <button onClick={handleStatusChange}>
+      {!showStatusForm && (
+        <button onClick={handleShowStatusForm} style={{ marginTop: 16 }}>
           Change Status
         </button>
-      </div>
+      )}
+      {showStatusForm && (
+        <div style={{ marginTop: 16 }}>
+          <input
+            type="text"
+            placeholder="Enter new status"
+            value={newStatus}
+            onChange={e => setNewStatus(e.target.value)}
+            style={{ marginRight: 8 }}
+          />
+          <input
+            type="text"
+            placeholder="Enter location"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            style={{ marginRight: 8 }}
+          />
+          <button onClick={handleStatusChange}>
+            Save Status
+          </button>
+          <button onClick={() => setShowStatusForm(false)} style={{ marginLeft: 8 }}>
+            Cancel
+          </button>
+        </div>
+      )}
       <button onClick={onEdit} style={{ marginTop: 16 }}>Edit Product</button>
       <button
         onClick={onShowChainOfCustody}
