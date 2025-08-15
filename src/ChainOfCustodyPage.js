@@ -48,12 +48,12 @@ function ChainOfCustodyPage({ product, onBack }) {
 
       const tableData = product.custodyHistory && product.custodyHistory.length > 0
         ? product.custodyHistory.map(entry => [
-            entry.date, entry.previousStatus, entry.newStatus
+            entry.date, entry.previousStatus, entry.newStatus, entry.location || '-'
           ])
-        : [['-', '-', '-']];
+        : [['-', '-', '-', '-']];
 
       autoTable(doc, {
-        head: [['Date', 'Previous Status', 'New Status']],
+        head: [['Date', 'Previous Status', 'New Status', 'Location']],
         body: tableData,
         startY: y,
         styles: { fontSize: 11, cellPadding: 3 },
@@ -105,6 +105,7 @@ function ChainOfCustodyPage({ product, onBack }) {
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Date</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Previous Status</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>New Status</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Location</th>
             </tr>
           </thead>
           <tbody>
@@ -114,11 +115,12 @@ function ChainOfCustodyPage({ product, onBack }) {
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{new Date(entry.date).toLocaleString()}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.previousStatus}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee', fontWeight: 'bold', color: '#42756a' }}>{entry.newStatus}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.location || '-'}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={3} style={{ padding: '8px' }}>No custody history available.</td>
+                <td colSpan={4} style={{ padding: '8px' }}>No custody history available.</td>
               </tr>
             )}
           </tbody>
