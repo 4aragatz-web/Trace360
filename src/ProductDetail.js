@@ -20,7 +20,7 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
     }
   };
 
-  const handleStatusChange = () => {
+  const handleStatusChange = async () => {
     if (!newStatus) {
       alert("Please enter a new status.");
       return;
@@ -42,10 +42,23 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
         }
       ]
     };
-    onUpdateProduct(updatedProduct);
-    setNewStatus('');
-    setLocation('');
-    setShowStatusForm(false);
+    // Save to backend
+    try {
+      await fetch(`https://trace360-co.onrender.com/products/${updatedProduct.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProduct),
+      });
+      if (onUpdateProduct) {
+        onUpdateProduct(updatedProduct);
+      }
+      setNewStatus('');
+      setLocation('');
+      setShowStatusForm(false);
+    } catch (err) {
+      alert("Failed to update product in backend.");
+      console.error(err);
+    }
   };
 
   return (
