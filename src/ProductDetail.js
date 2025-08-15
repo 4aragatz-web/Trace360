@@ -3,9 +3,38 @@ import React, { useState } from 'react';
 const EDIT_PASSWORD = "hemp123";
 
 function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct }) {
+  const [newStatus, setNewStatus] = useState('');
+
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
   }
+
+  const handleStatusChange = () => {
+    if (!newStatus) {
+      alert("Please enter a new status.");
+      return;
+    }
+    const location = window.prompt("Enter location for this status change:");
+    if (!location) {
+      alert("Location is required.");
+      return;
+    }
+    const updatedProduct = {
+      ...product,
+      currentStatus: newStatus,
+      custodyHistory: [
+        ...(product.custodyHistory || []),
+        {
+          date: new Date().toISOString(),
+          previousStatus: product.currentStatus,
+          newStatus,
+          location,
+        }
+      ]
+    };
+    onUpdateProduct(updatedProduct);
+    setNewStatus('');
+  };
 
   return (
     <div>
@@ -38,7 +67,17 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
         <span className="form-label">Current Status:</span>
         <span className="form-input">{product.currentStatus}</span>
       </div>
-      <button onClick={onEdit} style={{ marginTop: 16 }}>Edit Product</button>
+      <input
+        type="text"
+        placeholder="Enter new status"
+        value={newStatus}
+        onChange={e => setNewStatus(e.target.value)}
+        style={{ marginTop: 16 }}
+      />
+      <button onClick={handleStatusChange} style={{ marginTop: 16, marginLeft: 8 }}>
+        Change Status
+      </button>
+      <button onClick={onEdit} style={{ marginTop: 16, marginLeft: 8 }}>Edit Product</button>
       <button
         onClick={onShowChainOfCustody}
         style={{ marginTop: 16, marginLeft: 8 }}
