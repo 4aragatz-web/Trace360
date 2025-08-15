@@ -61,6 +61,22 @@ app.post('/products', async (req, res) => {
   res.json({ success: true });
 });
 
+// Update a product by id
+app.put('/products/:id', async (req, res) => {
+  const updatedProduct = req.body;
+  const { id } = req.params;
+  try {
+    const result = await Product.findOneAndUpdate(
+      { id },
+      updatedProduct,
+      { new: true, upsert: true }
+    );
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update product', details: err.message });
+  }
+});
+
 // Send chain of custody PDF as email attachment
 app.post('/send-custody-pdf', async (req, res) => {
   const { email, product } = req.body;
