@@ -165,14 +165,9 @@ function App() {
 
   // This function sends the updated product to the backend and refreshes the local state
   const handleUpdateProduct = async (updatedProduct) => {
-    try {
-      await axios.put(`https://trace360-co.onrender.com/products/${updatedProduct.id}`, updatedProduct);
-      // Refresh products from backend to ensure latest data
-      const res = await axios.get('https://trace360-co.onrender.com/products');
-      setProducts(res.data);
-    } catch (err) {
-      console.error('Failed to update product:', err);
-    }
+    await axios.put(`https://trace360-co.onrender.com/products/${updatedProduct.id}`, updatedProduct);
+    const res = await axios.get('https://trace360-co.onrender.com/products');
+    setProducts(res.data);
   };
 
   // --- Main Render ---
