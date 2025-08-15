@@ -26,7 +26,6 @@ function App() {
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
   const [showScanPage, setShowScanPage] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const videoRef = useRef(null);
 
   // Use a ref to always have the latest products in async handlers
@@ -169,10 +168,6 @@ function App() {
     );
   };
 
-  const handleShowForm = () => {
-    setShowForm(true);
-  };
-
   // --- Main Render ---
   return (
     <div className="app-container">
@@ -275,7 +270,6 @@ function App() {
             <ChainOfCustodyPage
               product={findProduct(traceId)}
               onBack={handleBack}
-              onUpdateProduct={handleUpdateProduct}
             />
           </>
         ) : (
