@@ -1,10 +1,21 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import logo from './logo.png';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-function ChainOfCustodyPage({ product, onBack }) {
+function ChainOfCustodyPage({ product, onBack, onUpdateProduct }) {
   const certificateRef = useRef();
+
+  // State for new custody event inputs
+  const [previousStatus, setPreviousStatus] = useState('');
+  const [newStatus, setNewStatus] = useState('');
+  const [location, setLocation] = useState('');
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
 
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
@@ -49,12 +60,12 @@ function ChainOfCustodyPage({ product, onBack }) {
 
       const tableData = product.custodyHistory && product.custodyHistory.length > 0
         ? product.custodyHistory.map(entry => [
-            entry.date, entry.previousStatus, entry.newStatus
+            entry.date, entry.previousStatus, entry.newStatus, entry.location || '-', entry.geo ? `${entry.geo.lat}, ${entry.geo.lng}` : '-'
           ])
-        : [['-', '-', '-']];
+        : [['-', '-', '-', '-', '-']];
 
       autoTable(doc, {
-        head: [['Date', 'Previous Status', 'New Status']],
+        head: [['Date', 'Previous Status', 'New Status', 'Location', 'Geo']],
         body: tableData,
         startY: y,
         styles: { fontSize: 11, cellPadding: 3 },
@@ -71,6 +82,38 @@ function ChainOfCustodyPage({ product, onBack }) {
       img.onload = null; // Prevent double call
       generatePDF();
     }
+  };
+
+  // Add new custody event
+  const handleAddEvent = () => {
+    if (!previousStatus || !newStatus || !location) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    const newEvent = {
+      date: new Date().toISOString(),
+      previousStatus,
+      newStatus,
+      location,
+      geo: lat && lng ? { lat: Number(lat), lng: Number(lng) } : undefined
+    };
+    // Update product's custodyHistory
+    const updatedProduct = {
+      ...product,
+      custodyHistory: [...(product.custodyHistory || []), newEvent]
+    };
+    if (onUpdateProduct) {
+      onUpdateProduct(updatedProduct);
+    } else {
+      // fallback: update in place (not recommended for real apps)
+      product.custodyHistory.push(newEvent);
+    }
+    // Clear form
+    setPreviousStatus('');
+    setNewStatus('');
+    setLocation('');
+    setLat('');
+    setLng('');
   };
 
   return (
@@ -101,6 +144,8 @@ function ChainOfCustodyPage({ product, onBack }) {
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #bbb' }}>Date</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #bbb' }}>Previous Status</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #bbb' }}>New Status</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #bbb' }}>Location</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #bbb' }}>Geo</th>
             </tr>
           </thead>
           <tbody>
@@ -110,19 +155,126 @@ function ChainOfCustodyPage({ product, onBack }) {
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.date}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.previousStatus}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.newStatus}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.location || '-'}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+                    {entry.geo ? `${entry.geo.lat}, ${entry.geo.lng}` : '-'}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={3} style={{ padding: '8px' }}>No custody history available.</td>
+                <td colSpan={5} style={{ padding: '8px' }}>No custody history available.</td>
               </tr>
             )}
           </tbody>
         </table>
+
+        {/* Timeline Visualization */}
+        <h4 style={{ marginTop: 32 }}>Custody Timeline</h4>
+        <VerticalTimeline>
+          {(product.custodyHistory || []).map((entry, idx) => (
+            <VerticalTimelineElement
+              key={idx}
+              date={new Date(entry.date).toLocaleString()}
+              iconStyle={{ background: '#42756a', color: '#fff' }}
+            >
+              <h3 className="vertical-timeline-element-title">{entry.newStatus}</h3>
+              <h4 className="vertical-timeline-element-subtitle">{entry.location || '-'}</h4>
+              <p>
+                <b>From:</b> {entry.previousStatus}<br />
+                {entry.geo ? (
+                  <span>
+                    <b>Geo:</b> {entry.geo.lat}, {entry.geo.lng}
+                  </span>
+                ) : null}
+              </p>
+            </VerticalTimelineElement>
+          ))}
+        </VerticalTimeline>
       </div>
+
+      {/* Add new custody event form */}
+      <div style={{ marginBottom: 24, background: '#f9f9f9', padding: 16, borderRadius: 8 }}>
+        <h4>Add New Custody Event</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <input
+            type="text"
+            placeholder="Previous Status"
+            value={previousStatus}
+            onChange={e => setPreviousStatus(e.target.value)}
+            style={{ flex: 1, minWidth: 120 }}
+          />
+          <input
+            type="text"
+            placeholder="New Status"
+            value={newStatus}
+            onChange={e => setNewStatus(e.target.value)}
+            style={{ flex: 1, minWidth: 120 }}
+          />
+          <input
+            type="text"
+            placeholder="Location"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            style={{ flex: 1, minWidth: 120 }}
+          />
+          <input
+            type="number"
+            placeholder="Latitude"
+            value={lat}
+            onChange={e => setLat(e.target.value)}
+            style={{ flex: 1, minWidth: 100 }}
+          />
+          <input
+            type="number"
+            placeholder="Longitude"
+            value={lng}
+            onChange={e => setLng(e.target.value)}
+            style={{ flex: 1, minWidth: 100 }}
+          />
+          <button onClick={handleAddEvent} style={{ flex: 1, minWidth: 120 }}>Add Event</button>
+        </div>
+      </div>
+
       <button onClick={handlePrint} style={{ marginRight: 8 }}>Print Certificate</button>
       <button onClick={handleDownloadPDF}>Download PDF</button>
       <button onClick={onBack} style={{ marginLeft: 8 }}>Back</button>
+
+      {/* Map Visualization */}
+      <h4 style={{ marginTop: 32 }}>Custody Map</h4>
+      {(product.custodyHistory || []).some(e => e.geo && e.geo.lat && e.geo.lng) ? (
+        <MapContainer
+          center={[
+            product.custodyHistory.find(e => e.geo && e.geo.lat && e.geo.lng)?.geo.lat || 0,
+            product.custodyHistory.find(e => e.geo && e.geo.lat && e.geo.lng)?.geo.lng || 0
+          ]}
+          zoom={5}
+          style={{ height: 400, width: '100%', marginBottom: 24 }}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <Polyline
+            positions={
+              product.custodyHistory
+                .filter(e => e.geo && e.geo.lat && e.geo.lng)
+                .map(e => [e.geo.lat, e.geo.lng])
+            }
+            color="blue"
+          />
+          {product.custodyHistory
+            .filter(e => e.geo && e.geo.lat && e.geo.lng)
+            .map((e, i) => (
+              <Marker key={i} position={[e.geo.lat, e.geo.lng]}>
+                <Popup>
+                  <b>{e.newStatus}</b><br />
+                  {e.location}<br />
+                  {new Date(e.date).toLocaleString()}
+                </Popup>
+              </Marker>
+            ))}
+        </MapContainer>
+      ) : (
+        <p>No geo-located custody events to display on map.</p>
+      )}
     </div>
   );
 }
