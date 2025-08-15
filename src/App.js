@@ -163,9 +163,10 @@ function App() {
   };
 
   const handleUpdateProduct = (updatedProduct) => {
-    setProducts(products =>
-      products.map(p => String(p.id) === String(updatedProduct.id) ? updatedProduct : p)
-    );
+    axios.put(`https://trace360-co.onrender.com/products/${updatedProduct.id}`, updatedProduct)
+      .then(() => axios.get('https://trace360-co.onrender.com/products'))
+      .then(res => setProducts(res.data))
+      .catch(err => console.error(err));
   };
 
   // --- Main Render ---
