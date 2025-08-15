@@ -26,6 +26,7 @@ function App() {
   const [editProduct, setEditProduct] = useState(null);
   const [showChainOfCustody, setShowChainOfCustody] = useState(false);
   const [showScanPage, setShowScanPage] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const videoRef = useRef(null);
 
   // Use a ref to always have the latest products in async handlers
@@ -166,6 +167,10 @@ function App() {
     setProducts(products =>
       products.map(p => String(p.id) === String(updatedProduct.id) ? updatedProduct : p)
     );
+  };
+
+  const handleShowForm = () => {
+    setShowForm(true);
   };
 
   // --- Main Render ---
