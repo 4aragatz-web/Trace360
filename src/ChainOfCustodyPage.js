@@ -2,10 +2,6 @@ import React, { useRef } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import logo from './logo.png';
-import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
-import 'react-vertical-timeline-component/style.min.css';
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 
 function ChainOfCustodyPage({ product, onBack }) {
   const certificateRef = useRef();
@@ -52,12 +48,12 @@ function ChainOfCustodyPage({ product, onBack }) {
 
       const tableData = product.custodyHistory && product.custodyHistory.length > 0
         ? product.custodyHistory.map(entry => [
-            entry.date, entry.previousStatus, entry.newStatus, entry.location || '-', entry.geo ? `${entry.geo.lat}, ${entry.geo.lng}` : '-'
+            entry.date, entry.previousStatus, entry.newStatus
           ])
-        : [['-', '-', '-', '-', '-']];
+        : [['-', '-', '-']];
 
       autoTable(doc, {
-        head: [['Date', 'Previous Status', 'New Status', 'Location', 'Geo']],
+        head: [['Date', 'Previous Status', 'New Status']],
         body: tableData,
         startY: y,
         styles: { fontSize: 11, cellPadding: 3 },
@@ -109,87 +105,24 @@ function ChainOfCustodyPage({ product, onBack }) {
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Date</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Previous Status</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>New Status</th>
-              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Location</th>
-              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #42756a', color: '#42756a' }}>Geo</th>
             </tr>
           </thead>
           <tbody>
             {sortedHistory.length > 0 ? (
               sortedHistory.map((entry, idx) => (
-                <tr key={idx} style={{ borderLeft: '4px solid #42756a', background: idx % 2 === 0 ? '#f7faf9' : '#fff' }}>
+                <tr key={idx} style={{ background: idx % 2 === 0 ? '#f7faf9' : '#fff' }}>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{new Date(entry.date).toLocaleString()}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.previousStatus}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee', fontWeight: 'bold', color: '#42756a' }}>{entry.newStatus}</td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{entry.location || '-'}</td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                    {entry.geo ? `${entry.geo.lat}, ${entry.geo.lng}` : '-'}
-                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} style={{ padding: '8px' }}>No custody history available.</td>
+                <td colSpan={3} style={{ padding: '8px' }}>No custody history available.</td>
               </tr>
             )}
           </tbody>
         </table>
-        {/* Timeline Visualization */}
-        <h4 style={{ marginTop: 32 }}>Custody Timeline</h4>
-        <VerticalTimeline>
-          {sortedHistory.map((entry, idx) => (
-            <VerticalTimelineElement
-              key={idx}
-              date={new Date(entry.date).toLocaleString()}
-              iconStyle={{ background: '#42756a', color: '#fff' }}
-            >
-              <h3 className="vertical-timeline-element-title">{entry.newStatus}</h3>
-              <h4 className="vertical-timeline-element-subtitle">{entry.location || '-'}</h4>
-              <p>
-                <b>From:</b> {entry.previousStatus}<br />
-                {entry.geo ? (
-                  <span>
-                    <b>Geo:</b> {entry.geo.lat}, {entry.geo.lng}
-                  </span>
-                ) : null}
-              </p>
-            </VerticalTimelineElement>
-          ))}
-        </VerticalTimeline>
-        {/* Map Visualization */}
-        <h4 style={{ marginTop: 32 }}>Custody Map</h4>
-        {sortedHistory.some(e => e.geo && e.geo.lat && e.geo.lng) ? (
-          <MapContainer
-            center={[
-              sortedHistory.find(e => e.geo && e.geo.lat && e.geo.lng)?.geo.lat || 0,
-              sortedHistory.find(e => e.geo && e.geo.lat && e.geo.lng)?.geo.lng || 0
-            ]}
-            zoom={5}
-            style={{ height: 400, width: '100%', marginBottom: 24 }}
-          >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <Polyline
-              positions={
-                sortedHistory
-                  .filter(e => e.geo && e.geo.lat && e.geo.lng)
-                  .map(e => [e.geo.lat, e.geo.lng])
-              }
-              color="blue"
-            />
-            {sortedHistory
-              .filter(e => e.geo && e.geo.lat && e.geo.lng)
-              .map((e, i) => (
-                <Marker key={i} position={[e.geo.lat, e.geo.lng]}>
-                  <Popup>
-                    <b>{e.newStatus}</b><br />
-                    {e.location}<br />
-                    {new Date(e.date).toLocaleString()}
-                  </Popup>
-                </Marker>
-              ))}
-          </MapContainer>
-        ) : (
-          <p>No geo-located custody events to display on map.</p>
-        )}
       </div>
       <button onClick={handlePrint} style={{ marginRight: 8 }}>Print Certificate</button>
       <button onClick={handleDownloadPDF}>Download PDF</button>
