@@ -4,6 +4,7 @@ const EDIT_PASSWORD = "hemp123";
 
 function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct }) {
   const [newStatus, setNewStatus] = useState('');
+  const [location, setLocation] = useState('');
 
   if (!product) {
     return <div>No product found for this Trace ID.</div>;
@@ -14,9 +15,8 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
       alert("Please enter a new status.");
       return;
     }
-    const location = window.prompt("Enter location for this status change:");
     if (!location) {
-      alert("Location is required.");
+      alert("Please enter a location for this status change.");
       return;
     }
     const updatedProduct = {
@@ -34,6 +34,7 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
     };
     onUpdateProduct(updatedProduct);
     setNewStatus('');
+    setLocation('');
   };
 
   return (
@@ -67,17 +68,26 @@ function ProductDetail({ product, onEdit, onShowChainOfCustody, onUpdateProduct 
         <span className="form-label">Current Status:</span>
         <span className="form-input">{product.currentStatus}</span>
       </div>
-      <input
-        type="text"
-        placeholder="Enter new status"
-        value={newStatus}
-        onChange={e => setNewStatus(e.target.value)}
-        style={{ marginTop: 16 }}
-      />
-      <button onClick={handleStatusChange} style={{ marginTop: 16, marginLeft: 8 }}>
-        Change Status
-      </button>
-      <button onClick={onEdit} style={{ marginTop: 16, marginLeft: 8 }}>Edit Product</button>
+      <div style={{ marginTop: 16 }}>
+        <input
+          type="text"
+          placeholder="Enter new status"
+          value={newStatus}
+          onChange={e => setNewStatus(e.target.value)}
+          style={{ marginRight: 8 }}
+        />
+        <input
+          type="text"
+          placeholder="Enter location"
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+          style={{ marginRight: 8 }}
+        />
+        <button onClick={handleStatusChange}>
+          Change Status
+        </button>
+      </div>
+      <button onClick={onEdit} style={{ marginTop: 16 }}>Edit Product</button>
       <button
         onClick={onShowChainOfCustody}
         style={{ marginTop: 16, marginLeft: 8 }}
